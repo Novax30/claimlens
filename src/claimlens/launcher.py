@@ -33,6 +33,14 @@ def _github_queue() -> None:
 
 
 def _verify_pr() -> None:
+    print("\nTest one PR — deeper checking")
+    print("1. Fetch the PR")
+    print("2. Record its commit")
+    print("3. Create a temporary checkout")
+    print("4. Detect the programming language")
+    print("5. Run the appropriate test command")
+    print("6. Create a pass, fail, timeout, or environment-failure report")
+    print("Docker is required for this safe execution mode.\n")
     repository = input("GitHub repository (OWNER/REPOSITORY): ").strip()
     number = int(input("Pull-request number: ").strip())
     result = verify_github_pull_request(repository, number, _token_client())
@@ -56,9 +64,13 @@ def main() -> int:
         print("\nClaimLens")
         print("1. Run the offline demo")
         print("2. Review a GitHub PR queue")
-        print("3. Test one GitHub PR")
+        print("3. Test one GitHub PR (deeper checking)")
         print("4. Exit")
-        choice = input("Choose an option: ").strip()
+        try:
+            choice = input("Choose an option: ").strip()
+        except EOFError:
+            print("\nClaimLens closed.")
+            return 0
         try:
             if choice == "1":
                 result = ClaimLensService(offline=True).analyze_file("input/example_request.json")
