@@ -13,6 +13,19 @@ It reads an issue or pull request description, finds relevant lines in a local p
 
 The project does not use cloud AI services.
 
+## Simplest way to start
+
+After cloning the repository, run one command:
+
+```bash
+./claimlens
+```
+
+The first run prepares the Python environment. Then choose from a small menu
+to run the offline demo, review a GitHub PR queue, or test one GitHub PR. A
+GitHub token is requested only when needed, hidden while typing, and is not
+saved by ClaimLens.
+
 ## Run the tests
 
 ```bash
