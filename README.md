@@ -8,8 +8,26 @@ It recommends what to inspect; the maintainer makes the final decision.
 ## Quick start
 
 Requirements: Python 3.9+ (3.10+ recommended), Git, and internet access for
-first-time installation. Docker is required for safe PR execution. Ollama is
-optional.
+first-time installation.
+
+Important: Docker Desktop is required when ClaimLens executes untrusted PR
+code. The offline demo, claim analysis, evidence search, and report generation
+work without Docker. Ollama is optional.
+
+Install Docker Desktop before using `claimlens verify`:
+
+1. Download [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. Install it for your operating system.
+3. Start Docker Desktop.
+4. Confirm it is available:
+
+```bash
+docker --version
+```
+
+If Docker is not installed, ClaimLens refuses unsafe PR execution and reports
+`environment_failure`. Trusted local code can be tested explicitly with
+`--sandbox local`.
 
 ```bash
 git clone --branch main https://github.com/Novax30/claimlens.git
