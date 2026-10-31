@@ -1,0 +1,8 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 103,
+    "title": "Fix timeout validation",
+    "body": "Expected: timeout validation is correct. Actual: this PR changes the project color. Reproduction steps: inspect the diff. Python 3.11."
+  }
+}

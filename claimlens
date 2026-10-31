@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+PROJECT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$PROJECT_DIR"
+
+if [ ! -x .venv/bin/python ]; then
+  echo "Preparing ClaimLens for first use..."
+  python3 -m venv .venv
+  .venv/bin/python -m pip install --upgrade pip
+  .venv/bin/python -m pip install -r requirements-dev.txt
+  .venv/bin/python -m pip install --no-deps -e .
+fi
+
+exec .venv/bin/python -m claimlens.launcher "$@"

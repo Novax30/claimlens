@@ -1,0 +1,11 @@
+{
+  "action": "opened",
+  "issue": {
+    "number": 1,
+    "title": "Negative timeout values are accepted",
+    "body": "The project accepts negative timeout values instead of rejecting them."
+  },
+  "repository": {
+    "full_name": "example/sample-project"
+  }
+}

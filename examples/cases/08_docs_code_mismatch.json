@@ -1,0 +1,7 @@
+{
+  "case_id": "08_docs_code_mismatch",
+  "kind": "pull_request",
+  "title": "Update timeout documentation",
+  "body": "The README says that timeout may be zero, but the code rejects zero.",
+  "expected_assessment": "supported"
+}

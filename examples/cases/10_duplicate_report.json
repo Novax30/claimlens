@@ -1,0 +1,8 @@
+{
+  "case_id": "10_duplicate_report",
+  "kind": "issue",
+  "title": "Negative timeout is accepted",
+  "body": "The application accepts a negative timeout value.",
+  "related_case_id": "02_contradicted_negative_accepted",
+  "expected_assessment": "contradicted"
+}

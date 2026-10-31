@@ -1,0 +1,8 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 101,
+    "title": "Fix negative timeout validation",
+    "body": "Expected: negative timeout values are rejected. Actual: this PR adds validation. Reproduction steps: run the timeout tests. Python 3.11."
+  }
+}

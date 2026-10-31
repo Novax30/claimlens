@@ -1,0 +1,8 @@
+{
+  "case_id": "07_missing_reproduction",
+  "kind": "issue",
+  "title": "Timeout sometimes fails",
+  "body": "The timeout is broken for some users.",
+  "expected_assessment": "uncertain",
+  "missing_evidence": ["reproduction steps", "expected behavior", "actual behavior", "version information"]
+}

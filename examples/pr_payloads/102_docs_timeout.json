@@ -1,0 +1,8 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 102,
+    "title": "Update timeout docs",
+    "body": "This PR updates the timeout documentation."
+  }
+}

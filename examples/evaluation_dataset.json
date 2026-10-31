@@ -1,0 +1,44 @@
+[
+  {
+    "case_id": "supported_rejection",
+    "kind": "issue",
+    "title": "Negative timeout values are rejected",
+    "body": "The project rejects negative timeout values with a ValueError.",
+    "expected_assessment": "supported"
+  },
+  {
+    "case_id": "contradicted_acceptance",
+    "kind": "issue",
+    "title": "Negative timeout values are accepted",
+    "body": "The timeout accepts -1 and continues running normally.",
+    "expected_assessment": "contradicted"
+  },
+  {
+    "case_id": "supported_default",
+    "kind": "issue",
+    "title": "The default timeout is 30 seconds",
+    "body": "When timeout is omitted, the application uses a default value of 30 seconds.",
+    "expected_assessment": "supported"
+  },
+  {
+    "case_id": "contradicted_default",
+    "kind": "issue",
+    "title": "The default timeout is 60 seconds",
+    "body": "The documentation claims that the default timeout is 60 seconds.",
+    "expected_assessment": "contradicted"
+  },
+  {
+    "case_id": "uncertain_report",
+    "kind": "issue",
+    "title": "Timeout sometimes fails",
+    "body": "The timeout is broken for some users.",
+    "expected_assessment": "uncertain"
+  },
+  {
+    "case_id": "uncertain_unrelated_pr",
+    "kind": "pull_request",
+    "title": "Fix timeout validation",
+    "body": "This pull request changes the project color from blue to green.",
+    "expected_assessment": "uncertain"
+  }
+]
