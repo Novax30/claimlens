@@ -7,6 +7,7 @@ from .github_api import GitHubClient
 from .github_pr_verifier import verify_github_pull_request
 from .github_queue import analyze_github_prs
 from .pr_queue import render_queue_markdown
+from .repository_checkout import ensure_repository_checkout
 from .service import ClaimLensService
 
 
@@ -17,8 +18,10 @@ def _token_client() -> GitHubClient:
 
 def _github_queue() -> None:
     repository = input("GitHub repository (OWNER/REPOSITORY): ").strip()
-    local_path = input("Local repository folder [.] : ").strip() or "."
     client = _token_client()
+    local_path = input("Local repository folder [download automatically]: ").strip()
+    if not local_path:
+        local_path = str(ensure_repository_checkout(repository, token=client.token))
     items = analyze_github_prs(
         repository,
         local_path,
@@ -27,7 +30,7 @@ def _github_queue() -> None:
     )
     output = Path("reports/my_github_queue.md")
     output.parent.mkdir(exist_ok=True)
-    output.write_text(render_queue_markdown(items), encoding="utf-8")
+    output.write_text(render_queue_markdown(items, repository=repository), encoding="utf-8")
     print(f"\nProcessed {len(items)} pull requests.")
     print(f"Report: {output}")
 

@@ -82,9 +82,11 @@ def analyze_pr_queue(
     return sorted(items, key=lambda item: {"high": 0, "medium": 1, "low": 2}[item.priority])
 
 
-def render_queue_markdown(items: List[PRQueueItem]) -> str:
+def render_queue_markdown(items: List[PRQueueItem], repository: str = "") -> str:
     lines = [
         "# ClaimLens PR Review Queue",
+        "",
+        f"**Repository:** `{_escape_table_cell(repository) or 'local'}`",
         "",
         "| PR | Title | Priority | Status | Assessment | Confidence | Missing details |",
         "| --- | --- | --- | --- | --- | --- | --- |",

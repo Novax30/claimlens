@@ -84,9 +84,13 @@ Run the local demonstration:
 Analyze a live PR queue with rules only:
 
 ```bash
-python -m claimlens.github_queue_cli OWNER/REPOSITORY /path/to/checkout \
+python -m claimlens.github_queue_cli OWNER/REPOSITORY \
   --no-llm --workers 4
 ```
+
+When no local checkout is provided, ClaimLens downloads a local cache at
+`.claimlens-repos/OWNER-REPOSITORY`. Use `--refresh` to update that cache.
+This changes only the local cache; it never updates the GitHub repository.
 
 `--no-llm` means no Ollama; GitHub is still contacted. The older `--offline`
 flag remains accepted for compatibility.
