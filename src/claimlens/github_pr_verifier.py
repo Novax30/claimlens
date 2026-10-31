@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 import tempfile
-from typing import Sequence
+from typing import Optional, Sequence
 
 from .github_api import GitHubClient, GitHubAPIError, parse_repository
 from .verification_runner import VerificationResult, run_repository_tests
@@ -21,7 +21,7 @@ def verify_github_pull_request(
     repository: str,
     number: int,
     client: GitHubClient,
-    command: Sequence[str] = ("python", "-m", "pytest", "-q"),
+    command: Optional[Sequence[str]] = None,
     timeout_seconds: int = 120,
 ) -> PullRequestVerification:
     """Read and test a PR branch in disposable directories.

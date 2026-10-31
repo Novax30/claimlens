@@ -43,6 +43,7 @@ def _verify_pr() -> None:
         f"**PR:** `#{result.number}`\n\n"
         f"**Commit:** `{result.commit_sha}`\n\n"
         f"**Status:** `{result.result.status}`\n\n"
+        f"**Language:** `{result.result.language}`\n\n"
         f"**Output:**\n\n```text\n{result.result.output}\n```\n",
         encoding="utf-8",
     )

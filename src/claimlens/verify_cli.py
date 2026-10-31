@@ -10,7 +10,7 @@ from .verification_runner import run_repository_tests
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Run repository tests in a disposable workspace.")
     parser.add_argument("repository_path")
-    parser.add_argument("--command", nargs="+", default=["python", "-m", "pytest", "-q"])
+    parser.add_argument("--command", nargs="+", help="Override the detected language test command")
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--output", default="reports/verification.md")
     args = parser.parse_args(argv)
@@ -21,6 +21,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     output.write_text(
         "# ClaimLens Verification\n\n"
         f"**Status:** `{result.status}`\n\n"
+        f"**Language:** `{result.language}`\n\n"
         f"**Command:** `{result.command}`\n\n"
         f"**Exit code:** `{result.exit_code}`\n\n"
         f"**Duration:** `{result.duration_seconds}` seconds\n\n"

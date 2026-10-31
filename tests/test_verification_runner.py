@@ -19,3 +19,17 @@ def test_verification_runner_reports_failure(tmp_path):
 
     assert result.status == "failed"
     assert result.exit_code != 0
+
+
+def test_language_profiles_detect_common_repository_markers(tmp_path):
+    from claimlens.language_profiles import detect_language
+
+    (tmp_path / "Cargo.toml").write_text("[package]\nname='demo'\n", encoding="utf-8")
+    assert detect_language(tmp_path).name == "Rust"
+
+
+def test_unknown_language_reports_environment_failure(tmp_path):
+    result = run_repository_tests(tmp_path)
+
+    assert result.status == "environment_failure"
+    assert result.language == "unknown"

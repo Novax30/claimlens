@@ -10,9 +10,12 @@ import tempfile
 import time
 from typing import Optional, Sequence, Union
 
+from .language_profiles import detect_language
+
 
 @dataclass(frozen=True)
 class VerificationResult:
+    language: str
     status: str
     command: str
     exit_code: Optional[int]
@@ -37,7 +40,7 @@ def _safe_environment(workspace: Path) -> dict:
 
 def run_repository_tests(
     repository_path: Union[str, Path],
-    command: Sequence[str] = ("python", "-m", "pytest", "-q"),
+    command: Optional[Sequence[str]] = None,
     timeout_seconds: int = 120,
     base_dir: Union[str, Path] = ".",
 ) -> VerificationResult:
@@ -51,6 +54,15 @@ def run_repository_tests(
     source = (Path(base_dir).resolve() / Path(repository_path)).resolve()
     if not source.is_dir():
         raise ValueError(f"repository directory not found: {source}")
+    profile = detect_language(source)
+    if command is None:
+        if profile is None:
+            return VerificationResult(
+                "unknown", "environment_failure", "automatic detection", None, 0.0,
+                "No supported language profile was detected.",
+            )
+        command = profile.command
+    language = profile.name if profile else "custom"
     if not command:
         raise ValueError("test command cannot be empty")
     if timeout_seconds < 1:
@@ -82,23 +94,19 @@ def run_repository_tests(
             executable = str(venv_path / "bin" / python_name)
             if os.name == "nt":
                 executable = str(venv_path / "Scripts" / python_name)
-            has_pytest = subprocess.run(
-                [executable, "-c", "import pytest"],
-                capture_output=True,
-                timeout=10,
-            ).returncode == 0
-            if not has_pytest:
-                # The runner itself is normally started inside the project's
-                # prepared virtual environment. Reuse it when the disposable
-                # venv cannot see the already-installed test dependencies.
-                current_has_pytest = subprocess.run(
-                    [sys.executable, "-c", "import pytest"],
-                    capture_output=True,
-                    timeout=10,
-                ).returncode == 0
-                if current_has_pytest:
+            if command[0] == "python":
+                has_pytest = subprocess.run([executable, "-c", "import pytest"], capture_output=True, timeout=10).returncode == 0
+                if not has_pytest and subprocess.run([sys.executable, "-c", "import pytest"], capture_output=True, timeout=10).returncode == 0:
                     executable = sys.executable
-            run_command = [executable if item == "python" else item for item in command]
+                run_command = [executable, *command[1:]]
+            else:
+                if shutil.which(command[0]) is None:
+                    return VerificationResult(
+                        language, "environment_failure", command_text, None,
+                        round(time.monotonic() - started, 3),
+                        f"Required tool not installed: {command[0]}",
+                    )
+                run_command = list(command)
             completed = subprocess.run(
                 run_command,
                 cwd=checkout,
@@ -110,6 +118,7 @@ def run_repository_tests(
             output = (completed.stdout + completed.stderr)[-20000:]
             status = "passed" if completed.returncode == 0 else "failed"
             return VerificationResult(
+                language=language,
                 status=status,
                 command=command_text,
                 exit_code=completed.returncode,
@@ -119,6 +128,7 @@ def run_repository_tests(
         except subprocess.TimeoutExpired as error:
             output = str(error.stdout or "")[-20000:]
             return VerificationResult(
+                language=language,
                 status="timeout",
                 command=command_text,
                 exit_code=None,
@@ -127,6 +137,7 @@ def run_repository_tests(
             )
         except (OSError, subprocess.SubprocessError) as error:
             return VerificationResult(
+                language=language,
                 status="environment_failure",
                 command=command_text,
                 exit_code=None,

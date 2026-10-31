@@ -12,7 +12,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Fetch and test one GitHub PR read-only.")
     parser.add_argument("repository", help="GitHub repository in OWNER/REPOSITORY form")
     parser.add_argument("number", type=int, help="Pull-request number")
-    parser.add_argument("--command", nargs="+", default=["python", "-m", "pytest", "-q"])
+    parser.add_argument("--command", nargs="+", help="Override the detected language test command")
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--output", default="reports/github_pr_verification.md")
     args = parser.parse_args(argv)
@@ -37,6 +37,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         f"**PR:** `#{verification.number}`\n\n"
         f"**Commit:** `{verification.commit_sha}`\n\n"
         f"**Status:** `{result.status}`\n\n"
+        f"**Language:** `{result.language}`\n\n"
         f"**Command:** `{result.command}`\n\n"
         f"**Exit code:** `{result.exit_code}`\n\n"
         f"**Duration:** `{result.duration_seconds}` seconds\n\n"

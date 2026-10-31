@@ -104,8 +104,9 @@ dataset, not a claim of production performance.
 PYTHONPATH=src python3 -m claimlens.verify_cli examples/sample_project
 ```
 
-ClaimLens copies the repository to a temporary workspace, creates a disposable
-Python virtual environment when its test dependencies are available, removes
+ClaimLens copies the repository to a temporary workspace, detects the project
+language, selects the appropriate test command, creates a disposable
+environment, and removes
 credentials and proxy settings, disables network-dependent package
 installation, applies a timeout, and records the test result. This is a
 defensive local runner, not a complete VM security boundary; high-risk code
