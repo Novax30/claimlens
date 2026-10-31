@@ -100,11 +100,12 @@ def run_repository_tests(
                     executable = sys.executable
                 run_command = [executable, *command[1:]]
             else:
-                if shutil.which(command[0]) is None:
+                required_tool = profile.executable if profile else command[0]
+                if shutil.which(required_tool) is None:
                     return VerificationResult(
                         language, "environment_failure", command_text, None,
                         round(time.monotonic() - started, 3),
-                        f"Required tool not installed: {command[0]}",
+                        f"Required tool not installed: {required_tool}",
                     )
                 run_command = list(command)
             completed = subprocess.run(
