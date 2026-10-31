@@ -12,10 +12,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("repository_path")
     parser.add_argument("--command", nargs="+", help="Override the detected language test command")
     parser.add_argument("--timeout", type=int, default=120)
+    parser.add_argument("--sandbox", choices=("docker", "local"), default="docker")
     parser.add_argument("--output", default="reports/verification.md")
     args = parser.parse_args(argv)
 
-    result = run_repository_tests(args.repository_path, args.command, args.timeout)
+    result = run_repository_tests(args.repository_path, args.command, args.timeout, sandbox=args.sandbox)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(

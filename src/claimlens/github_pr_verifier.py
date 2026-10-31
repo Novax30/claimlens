@@ -1,6 +1,7 @@
 """Fetch one GitHub PR into a temporary checkout and run its tests."""
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -23,6 +24,7 @@ def verify_github_pull_request(
     client: GitHubClient,
     command: Optional[Sequence[str]] = None,
     timeout_seconds: int = 120,
+    sandbox: str = "docker",
 ) -> PullRequestVerification:
     """Read and test a PR branch in disposable directories.
 
@@ -49,14 +51,22 @@ def verify_github_pull_request(
             checkout,
             command=command,
             timeout_seconds=timeout_seconds,
+            sandbox=sandbox,
         )
         return PullRequestVerification(number=number, commit_sha=sha, result=result)
 
 
 def _run_git(command: Sequence[str], timeout: int) -> None:
+    safe_env = {
+        key: value for key, value in os.environ.items()
+        if key not in {"GITHUB_TOKEN", "GH_TOKEN", "SSH_AUTH_SOCK"}
+        and "SECRET" not in key.upper()
+        and "PASSWORD" not in key.upper()
+    }
     try:
         completed = subprocess.run(
             ["git", *command],
+            env=safe_env,
             capture_output=True,
             text=True,
             timeout=timeout,

@@ -10,14 +10,15 @@ class LanguageProfile:
     name: str
     command: Sequence[str]
     executable: str
+    image: str
 
 
 PROFILES = {
-    "python": LanguageProfile("Python", ("python", "-m", "pytest", "-q"), "python"),
-    "rust": LanguageProfile("Rust", ("cargo", "test", "--locked"), "cargo"),
-    "cpp": LanguageProfile("C/C++", ("sh", "-c", "cmake -S . -B build && cmake --build build && ctest --test-dir build --output-on-failure"), "cmake"),
-    "javascript": LanguageProfile("JavaScript/TypeScript", ("npm", "test", "--", "--runInBand"), "npm"),
-    "go": LanguageProfile("Go", ("go", "test", "./..."), "go"),
+    "python": LanguageProfile("Python", ("python", "-m", "pytest", "-q"), "python", "python:3.11-slim"),
+    "rust": LanguageProfile("Rust", ("cargo", "test", "--locked"), "cargo", "rust:1-slim"),
+    "cpp": LanguageProfile("C/C++", ("sh", "-c", "cmake -S . -B build && cmake --build build && ctest --test-dir build --output-on-failure"), "cmake", "debian:bookworm-slim"),
+    "javascript": LanguageProfile("JavaScript/TypeScript", ("npm", "test", "--", "--runInBand"), "npm", "node:22-bookworm-slim"),
+    "go": LanguageProfile("Go", ("go", "test", "./..."), "go", "golang:1.23-bookworm"),
 }
 
 

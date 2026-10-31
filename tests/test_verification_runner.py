@@ -1,4 +1,4 @@
-from claimlens.verification_runner import run_repository_tests
+from claimlens.verification_runner import _docker_command, run_repository_tests
 
 
 def test_verification_runner_passes_sample_project():
@@ -33,3 +33,12 @@ def test_unknown_language_reports_environment_failure(tmp_path):
 
     assert result.status == "environment_failure"
     assert result.language == "unknown"
+
+
+def test_docker_command_has_safety_controls(tmp_path):
+    command = _docker_command(tmp_path, ("python", "-m", "pytest"), "python:3.11-slim")
+
+    assert "--network" in command and "none" in command
+    assert "--read-only" in command
+    assert "--cap-drop" in command and "ALL" in command
+    assert "--user" in command and "65532:65532" in command

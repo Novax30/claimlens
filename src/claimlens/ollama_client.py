@@ -32,6 +32,7 @@ class OllamaClient:
             ],
             "stream": False,
             "format": "json",
+            "options": {"temperature": 0, "seed": 42},
         }
         request = Request(
             self.endpoint,

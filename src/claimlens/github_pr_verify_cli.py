@@ -14,6 +14,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("number", type=int, help="Pull-request number")
     parser.add_argument("--command", nargs="+", help="Override the detected language test command")
     parser.add_argument("--timeout", type=int, default=120)
+    parser.add_argument("--sandbox", choices=("docker", "local"), default="docker")
     parser.add_argument("--output", default="reports/github_pr_verification.md")
     args = parser.parse_args(argv)
 
@@ -24,6 +25,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             GitHubClient(),
             command=args.command,
             timeout_seconds=args.timeout,
+            sandbox=args.sandbox,
         )
     except (GitHubAPIError, OSError, ValueError) as error:
         print(f"ClaimLens error: {error}")

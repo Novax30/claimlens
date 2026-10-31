@@ -17,7 +17,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("repository_path", help="Local checkout to inspect")
     parser.add_argument("--state", choices=("open", "closed", "all"), default="open")
     parser.add_argument("--workers", type=int, default=4, help="Parallel PR workers (default: 4)")
-    parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--no-llm", "--offline", dest="no_llm", action="store_true", help="Use deterministic rules instead of Ollama")
     parser.add_argument("--output", default="reports/github_pr_queue.md")
     args = parser.parse_args(argv)
 
@@ -25,7 +25,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         items = analyze_github_prs(
             args.repository,
             args.repository_path,
-            ClaimLensService(offline=args.offline),
+            ClaimLensService(offline=args.no_llm),
             GitHubClient(),
             state=args.state,
             max_workers=args.workers,

@@ -1,2 +1,3 @@
 pytest>=8.0,<9.0
 wheel>=0.40
+setuptools>=68

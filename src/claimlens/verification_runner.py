@@ -38,11 +38,31 @@ def _safe_environment(workspace: Path) -> dict:
     return env
 
 
+def _docker_command(checkout: Path, command: Sequence[str], image: str) -> list:
+    return [
+        "docker", "run", "--rm",
+        "--network", "none",
+        "--read-only",
+        "--cap-drop", "ALL",
+        "--security-opt", "no-new-privileges",
+        "--pids-limit", "256",
+        "--cpus", "2",
+        "--memory", "2g",
+        "--user", "65532:65532",
+        "--tmpfs", "/tmp:rw,noexec,nosuid,size=256m",
+        "-v", f"{checkout}:/workspace:ro",
+        "-w", "/workspace",
+        image,
+        *command,
+    ]
+
+
 def run_repository_tests(
     repository_path: Union[str, Path],
     command: Optional[Sequence[str]] = None,
     timeout_seconds: int = 120,
     base_dir: Union[str, Path] = ".",
+    sandbox: str = "local",
 ) -> VerificationResult:
     """Run a test command in a disposable copy of a local repository.
 
@@ -54,6 +74,8 @@ def run_repository_tests(
     source = (Path(base_dir).resolve() / Path(repository_path)).resolve()
     if not source.is_dir():
         raise ValueError(f"repository directory not found: {source}")
+    if sandbox not in {"local", "docker"}:
+        raise ValueError("sandbox must be local or docker")
     profile = detect_language(source)
     if command is None:
         if profile is None:
@@ -80,6 +102,45 @@ def run_repository_tests(
         )
         (workspace / "home").mkdir()
         (workspace / "tmp").mkdir()
+
+        if sandbox == "docker":
+            import shutil as system_shutil
+            if system_shutil.which("docker") is None:
+                return VerificationResult(
+                    language, "environment_failure", command_text, None,
+                    round(time.monotonic() - started, 3),
+                    "Docker is required for safe verification but is not installed.",
+                )
+            try:
+                completed = subprocess.run(
+                    _docker_command(checkout, command, profile.image if profile else "python:3.11-slim"),
+                    cwd=checkout,
+                    env=_safe_environment(workspace),
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds,
+                )
+                output = (completed.stdout + completed.stderr)[-20000:]
+                return VerificationResult(
+                    language=language,
+                    status="passed" if completed.returncode == 0 else "failed",
+                    command=command_text,
+                    exit_code=completed.returncode,
+                    duration_seconds=round(time.monotonic() - started, 3),
+                    output=output,
+                )
+            except subprocess.TimeoutExpired as error:
+                return VerificationResult(
+                    language=language, status="timeout", command=command_text,
+                    exit_code=None, duration_seconds=round(time.monotonic() - started, 3),
+                    output=str(error.stdout or "")[-20000:],
+                )
+            except (OSError, subprocess.SubprocessError) as error:
+                return VerificationResult(
+                    language=language, status="environment_failure", command=command_text,
+                    exit_code=None, duration_seconds=round(time.monotonic() - started, 3),
+                    output=str(error),
+                )
 
         venv_path = workspace / "venv"
         try:
