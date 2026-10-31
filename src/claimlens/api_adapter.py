@@ -20,7 +20,7 @@ def request_from_api_payload(payload: Dict[str, Any]) -> AnalysisRequest:
     kind = report.get("kind", "issue")
     title = report.get("title")
     body = report.get("body")
-    if kind not in {"issue", "pull_request"}:
+    if not isinstance(kind, str) or kind not in {"issue", "pull_request"}:
         raise InputValidationError("report.kind must be issue or pull_request")
     if not isinstance(title, str) or not title.strip():
         raise InputValidationError("report.title must be a non-empty string")

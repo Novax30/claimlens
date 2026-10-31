@@ -21,6 +21,10 @@ class PRQueueItem:
     missing: List[str]
 
 
+def _escape_table_cell(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ").replace("\r", " ")
+
+
 def _classify(result, request, number: str) -> PRQueueItem:
     quality = assess_report_quality(request.report)
     assessments = result.assessments
@@ -88,8 +92,10 @@ def render_queue_markdown(items: List[PRQueueItem]) -> str:
     for item in items:
         missing = ", ".join(item.missing) if item.missing else "None detected"
         lines.append(
-            f"| #{item.number} | {item.title} | `{item.priority}` | `{item.status}` | "
-            f"`{item.assessment}` | `{item.confidence}` | {missing} |"
+            f"| #{_escape_table_cell(item.number)} | {_escape_table_cell(item.title)} | "
+            f"`{_escape_table_cell(item.priority)}` | `{_escape_table_cell(item.status)}` | "
+            f"`{_escape_table_cell(item.assessment)}` | `{_escape_table_cell(item.confidence)}` | "
+            f"{_escape_table_cell(missing)} |"
         )
     lines.extend(
         [

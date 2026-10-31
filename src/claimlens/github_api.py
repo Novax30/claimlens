@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import time
 from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError, URLError
@@ -23,9 +24,9 @@ class GitHubRepository:
 
 
 def parse_repository(value: str) -> GitHubRepository:
-    parts = value.strip().strip("/").split("/")
-    if len(parts) != 2 or not all(parts):
+    if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9_-]+/[A-Za-z0-9_-]+", value):
         raise GitHubAPIError("repository must use the OWNER/REPOSITORY format")
+    parts = value.split("/")
     return GitHubRepository(owner=parts[0], name=parts[1])
 
 
