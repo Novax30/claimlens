@@ -33,3 +33,22 @@ def test_live_queue_uses_pr_files_without_writing_to_github():
 
     assert len(items) == 1
     assert items[0].number == "7"
+
+
+def test_live_queue_processes_multiple_prs_with_bounded_workers():
+    class FakeClient(GitHubClient):
+        def list_pull_requests(self, repository, state="open"):
+            return [
+                {"number": 7, "title": "Fix timeout", "body": "Reject timeout values."},
+                {"number": 8, "title": "Document timeout", "body": "The timeout is documented."},
+                {"number": 9, "title": "Unrelated", "body": "Changes the project color."},
+            ]
+
+        def list_pull_request_files(self, repository, number):
+            return [{"filename": "src/config.py", "patch": "@@ -1 +1 @@\n+timeout = 1"}]
+
+    items = analyze_github_prs(
+        "o/r", "examples/sample_project", ClaimLensService(offline=True), FakeClient(), max_workers=2
+    )
+
+    assert [item.number for item in items] == ["7", "8", "9"]

@@ -140,6 +140,17 @@ The command reads pull-request metadata from GitHub and inspects the local
 checkout. It writes a Markdown queue and never posts comments, changes labels,
 approves, closes, merges, or pushes anything.
 
+PRs are analyzed in parallel with four bounded workers by default. Change this
+carefully on a smaller computer:
+
+```bash
+PYTHONPATH=src python3 -m claimlens.github_queue_cli \
+  OWNER/REPOSITORY /path/to/local/repository --offline --workers 2
+```
+
+If one PR fails, ClaimLens keeps processing the other PRs and marks the failed
+one for manual review.
+
 Responses are cached locally for five minutes in `.claimlens-cache/` to reduce
 repeat requests. The cache is ignored by Git and the client stops requesting
 when GitHub reports that the rate limit has been reached.

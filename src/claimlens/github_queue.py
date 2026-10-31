@@ -1,6 +1,7 @@
 """Connect read-only GitHub PR metadata and patches to the ClaimLens queue."""
 
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
 from .github_adapter import request_from_github_payload
@@ -43,9 +44,13 @@ def analyze_github_prs(
     service: ClaimLensService,
     client: GitHubClient,
     state: str = "open",
+    max_workers: int = 4,
 ) -> List[PRQueueItem]:
-    items: List[PRQueueItem] = []
-    for pull_request in client.list_pull_requests(repository, state=state):
+    if max_workers < 1:
+        raise ValueError("max_workers must be positive")
+    pull_requests = client.list_pull_requests(repository, state=state)
+
+    def analyze_one(pull_request: Dict[str, Any]) -> PRQueueItem:
         payload: Dict[str, Any] = {"pull_request": pull_request}
         request = request_from_github_payload(payload, repository_path)
         number = str(pull_request.get("number", "unknown"))
@@ -55,6 +60,34 @@ def analyze_github_prs(
             base_dir=".",
             extra_evidence=_diff_evidence(files),
         )
-        items.append(_classify(result, request, number))
+        return _classify(result, request, number)
 
-    return sorted(items, key=lambda item: {"high": 0, "medium": 1, "low": 2}[item.priority])
+    items: List[PRQueueItem] = []
+    worker_count = min(max_workers, len(pull_requests)) or 1
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = {
+            executor.submit(analyze_one, pull_request): pull_request
+            for pull_request in pull_requests
+        }
+        for future in as_completed(futures):
+            pull_request = futures[future]
+            try:
+                items.append(future.result())
+            except Exception:
+                items.append(PRQueueItem(
+                    number=str(pull_request.get("number", "unknown")),
+                    title=str(pull_request.get("title", "Untitled PR")),
+                    priority="high",
+                    status="analysis_failed",
+                    assessment="uncertain",
+                    confidence="low",
+                    missing=["automatic analysis failed; inspect this PR manually"],
+                ))
+
+    return sorted(
+        items,
+        key=lambda item: (
+            {"high": 0, "medium": 1, "low": 2}[item.priority],
+            int(item.number) if item.number.isdigit() else 0,
+        ),
+    )
