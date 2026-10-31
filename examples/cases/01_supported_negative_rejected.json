@@ -1,0 +1,7 @@
+{
+  "case_id": "01_supported_negative_rejected",
+  "kind": "issue",
+  "title": "Negative timeout values are rejected",
+  "body": "The project rejects negative timeout values with a ValueError.",
+  "expected_assessment": "supported"
+}

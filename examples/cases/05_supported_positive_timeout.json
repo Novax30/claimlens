@@ -1,0 +1,7 @@
+{
+  "case_id": "05_supported_positive_timeout",
+  "kind": "pull_request",
+  "title": "Allow positive timeout values",
+  "body": "This change allows a positive integer such as 10 to be used as a timeout.",
+  "expected_assessment": "supported"
+}

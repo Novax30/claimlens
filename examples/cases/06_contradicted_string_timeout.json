@@ -1,0 +1,7 @@
+{
+  "case_id": "06_contradicted_string_timeout",
+  "kind": "issue",
+  "title": "String timeouts are accepted",
+  "body": "The configuration accepts the string value '10' as a valid timeout.",
+  "expected_assessment": "contradicted"
+}

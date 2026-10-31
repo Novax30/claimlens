@@ -1,0 +1,8 @@
+{
+  "repository_path": "examples/sample_project",
+  "report": {
+    "kind": "issue",
+    "title": "Timeout accepts negative values",
+    "body": "The application accepts a negative timeout value instead of rejecting it. Expected behavior: negative timeout values should be rejected with a clear error."
+  }
+}

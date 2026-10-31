@@ -1,0 +1,8 @@
+{
+  "case_id": "11_missing_project_file",
+  "kind": "issue",
+  "title": "Timeout behavior in missing module",
+  "body": "The timeout behavior is defined in src/missing_config.py.",
+  "expected_assessment": "uncertain",
+  "missing_evidence": ["referenced source file"]
+}

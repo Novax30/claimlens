@@ -1,0 +1,7 @@
+{
+  "case_id": "04_contradicted_default_timeout",
+  "kind": "issue",
+  "title": "The default timeout is 60 seconds",
+  "body": "The documentation claims that the default timeout is 60 seconds.",
+  "expected_assessment": "contradicted"
+}

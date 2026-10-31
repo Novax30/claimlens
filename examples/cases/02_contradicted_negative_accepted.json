@@ -1,0 +1,7 @@
+{
+  "case_id": "02_contradicted_negative_accepted",
+  "kind": "issue",
+  "title": "Negative timeout values are accepted",
+  "body": "The timeout accepts -1 and continues running normally.",
+  "expected_assessment": "contradicted"
+}

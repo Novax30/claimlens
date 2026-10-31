@@ -1,0 +1,7 @@
+{
+  "case_id": "09_unrelated_pr",
+  "kind": "pull_request",
+  "title": "Fix timeout validation",
+  "body": "This pull request changes the project color from blue to green.",
+  "expected_assessment": "uncertain"
+}
