@@ -5,8 +5,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
 from .github_adapter import request_from_github_payload
-from .github_api import GitHubClient
+from .github_api import GitHubAPIError, GitHubClient
 from .evidence_collector import Evidence
+from .input_reader import InputValidationError
+from .ollama_client import OllamaError
 from .pr_queue import PRQueueItem, _classify
 from .service import ClaimLensService
 
@@ -73,7 +75,7 @@ def analyze_github_prs(
             pull_request = futures[future]
             try:
                 items.append(future.result())
-            except Exception:
+            except (GitHubAPIError, InputValidationError, OllamaError, OSError, ValueError):
                 items.append(PRQueueItem(
                     number=str(pull_request.get("number", "unknown")),
                     title=str(pull_request.get("title", "Untitled PR")),

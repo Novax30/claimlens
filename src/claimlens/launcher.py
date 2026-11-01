@@ -22,10 +22,11 @@ def _github_queue() -> None:
     local_path = input("Local repository folder [download automatically]: ").strip()
     if not local_path:
         local_path = str(ensure_repository_checkout(repository, token=client.token))
+    use_models = input("Use local Ollama models? [y/N]: ").strip().lower() == "y"
     items = analyze_github_prs(
         repository,
         local_path,
-        ClaimLensService(offline=True),
+        ClaimLensService(offline=not use_models),
         client,
     )
     output = Path("reports/my_github_queue.md")
