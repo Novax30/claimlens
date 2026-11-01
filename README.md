@@ -1,9 +1,58 @@
 # ClaimLens
 
+> **Turn PR claims into evidence a maintainer can inspect.**
+
+[![CI](https://github.com/Novax30/claimlens/actions/workflows/ci.yml/badge.svg)](https://github.com/Novax30/claimlens/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 ClaimLens is a read-only CLI for open-source maintainers. It treats statements
 in issues and pull requests as technical hypotheses, checks them against code,
 tests, documentation, and PR diffs, and produces an evidence-linked report.
 It recommends what to inspect; the maintainer makes the final decision.
+
+## Why ClaimLens?
+
+When a repository receives more PRs than a maintainer can read carefully, the
+hard part is not opening another diff—it is deciding which technical claims
+deserve attention first. ClaimLens creates a review map:
+
+| You provide | ClaimLens returns |
+| --- | --- |
+| A repository and its PRs | A ranked review queue |
+| Technical statements | Claim-by-claim assessments |
+| Source, tests, and diffs | Exact evidence references |
+| A testable PR | A safe pass/fail/timeout result |
+
+It is an assistant, not an automatic merge or rejection bot.
+
+## The whole idea in one picture
+
+```mermaid
+flowchart LR
+    A[GitHub issue or PR] --> B[Extract claims]
+    B --> C[Find code, tests, docs, and diff evidence]
+    C --> D{Verification}
+    D -->|Static evidence| E[Supported / Contradicted / Uncertain]
+    D -->|Safe test run| F[Passed / Failed / Timeout]
+    E --> G[Structured maintainer report]
+    F --> G
+    G --> H[Maintainer decides]
+```
+
+The key idea is simple: **AI suggests what to investigate; repository evidence
+supports the result; the maintainer decides what happens next.**
+
+## Try it in 60 seconds
+
+```bash
+git clone --branch main https://github.com/Novax30/claimlens.git
+cd claimlens
+./claimlens
+```
+
+Choose **1. Run the offline demo**. It needs no GitHub token, Docker, or Ollama
+and writes a report to `reports/launcher_demo.md`.
 
 ## Quick start
 
@@ -28,12 +77,6 @@ docker --version
 If Docker is not installed, ClaimLens refuses unsafe PR execution and reports
 `environment_failure`. Trusted local code can be tested explicitly with
 `--sandbox local`.
-
-```bash
-git clone --branch main https://github.com/Novax30/claimlens.git
-cd claimlens
-./claimlens
-```
 
 The launcher creates the environment and opens a small menu. Choose the offline
 demo, a GitHub PR queue, or one PR verification.
@@ -127,15 +170,18 @@ Do not use `--sandbox local` on untrusted contributor code.
 
 ## How it works
 
-```text
-Issue or PR
-    → validate input and record commit SHA
-    → extract independent technical claims
-    → retrieve source, tests, docs, and PR diff evidence
-    → choose a language verification profile
-    → run safe checks when possible
-    → correlate evidence and uncertainty
-    → write a maintainer report
+```mermaid
+sequenceDiagram
+    participant M as Maintainer
+    participant C as ClaimLens CLI
+    participant G as GitHub
+    participant S as Safe sandbox
+    M->>C: Enter OWNER/REPOSITORY
+    C->>G: Read PRs, diffs, and commit SHAs
+    C->>C: Extract claims and retrieve evidence
+    C->>S: Run detected language tests
+    S-->>C: Result and bounded logs
+    C-->>M: Queue, report, and next action
 ```
 
 Each claim receives `supported`, `contradicted`, or `uncertain`. Execution is
@@ -148,13 +194,28 @@ or `go test`. Missing toolchains are reported rather than silently installed.
 
 ## Example result
 
+The useful output is not a mysterious score. It is a short trail from claim to
+evidence:
+
 ```text
+PR #42 — Fix timeout validation
+Priority: medium | Status: needs_review
+
 Claim: Negative timeout values are rejected
 Assessment: supported
 Confidence: high
 Execution: passed
 Evidence: src/config.py:12, tests/test_config.py:15
 Recommendation: maintainer review
+```
+
+For an uncertain report, the result is explicit:
+
+```text
+Assessment: uncertain
+Execution: not_attempted
+Missing: reproduction steps, version information
+Recommendation: ask the contributor for more detail
 ```
 
 The report includes the repository commit, claim-level explanations, exact
