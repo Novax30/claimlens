@@ -170,18 +170,50 @@ Do not use `--sandbox local` on untrusted contributor code.
 
 ## How it works
 
+Think of ClaimLens as a small investigation pipeline. It does not ask an AI
+model to guess whether a PR is “good” or “bad.” It turns each technical
+statement into a question, gathers evidence, and shows you what to inspect.
+
 ```mermaid
-sequenceDiagram
-    participant M as Maintainer
-    participant C as ClaimLens CLI
-    participant G as GitHub
-    participant S as Safe sandbox
-    M->>C: Enter OWNER/REPOSITORY
-    C->>G: Read PRs, diffs, and commit SHAs
-    C->>C: Extract claims and retrieve evidence
-    C->>S: Run detected language tests
-    S-->>C: Result and bounded logs
-    C-->>M: Queue, report, and next action
+flowchart TD
+    M[Maintainer enters a repository] --> G[GitHub read-only API]
+    G --> P[PR title, body, diff, commit SHA]
+    P --> Q[Parallel PR queue]
+    Q --> C[Claim extraction]
+    C --> E[Evidence layer]
+    E --> E1[Source code]
+    E --> E2[Tests]
+    E --> E3[Documentation]
+    E --> E4[PR diff]
+    P --> L[Language detection]
+    L --> T[Language profile]
+    T --> S[Docker sandbox]
+    S --> R[Test result]
+    E --> A[Assessment engine]
+    R --> A
+    A --> O[Markdown report]
+    O --> H[Human maintainer decides]
+```
+
+### The six-step journey
+
+1. **Connect** — Read PRs and changed files through GitHub's read-only API.
+2. **Identify** — Record the exact commit SHA and extract technical claims.
+3. **Investigate** — Search the repository's code, tests, documentation, and
+   diff for relevant evidence.
+4. **Verify** — Detect Python, Rust, C/C++, JavaScript/TypeScript, or Go and
+   choose its test profile.
+5. **Explain** — Combine evidence and test output into a traceable finding.
+6. **Hand off** — Give the maintainer a queue and a recommended next action.
+
+The model is only one component:
+
+```text
+Qwen2.5          → organizes claims
+Python rules     → validates structure and safety
+Repository       → supplies evidence
+Docker sandbox   → runs tests with limits
+Maintainer       → makes the final decision
 ```
 
 Each claim receives `supported`, `contradicted`, or `uncertain`. Execution is
